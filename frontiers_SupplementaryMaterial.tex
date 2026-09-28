@@ -1,0 +1,157 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Frontiers Supplementary Material — AI prompts disclosure
+% Class: frontiers_suppmat
+% Per Frontiers BE WISE guidance (April 2026): list the generative-AI
+% prompts used in manuscript preparation.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[utf8]{frontiers_suppmat}
+\usepackage{url,hyperref,lineno,microtype}
+\hypersetup{hidelinks}
+\usepackage[onehalfspacing]{setspace}
+
+\begin{document}
+\onecolumn
+\firstpage{1}
+
+\title[Supplementary Material]{{\helveticaitalic{Supplementary Material}}}
+
+\maketitle
+
+\section{Generative AI Prompts Used in Manuscript Preparation}
+
+{\bf Manuscript:} Diagnostics and Infrastructure for Foundation Model-Based
+Multi-Agent Systems: A Review of the Runtime Stack
+
+{\bf Journal:} Frontiers in Computer Science
+
+{\bf Date:} 2026-09-11
+
+\subsection{Scope of this disclosure}
+
+Per the Frontiers BE WISE AI guidance (April 2026), this file lists the
+generative-AI prompts used in the preparation of the above manuscript.
+AI-assisted tools were used for four tasks:
+
+\begin{enumerate}
+  \item \textbf{Literature search and screening} -- identifying candidate
+        papers within the survey's scope of multi-agent diagnostics and
+        infrastructure.
+  \item \textbf{Taxonomy construction and organization} -- structuring the
+        reviewed literature into the diagnostic and infrastructural
+        categories reported in the manuscript.
+  \item \textbf{Draft generation} -- producing initial prose for the
+        manuscript sections, subsequently revised by the authors.
+  \item \textbf{Reference verification} -- cross-checking bibliographic
+        metadata (titles, authors, venues, publication years, arXiv
+        identifiers) against the source papers.
+\end{enumerate}
+
+The prompts below are the canonical/representative set used for each task.
+Long-running interactive refinement sessions produced many variations and
+follow-up prompts; the categories and purposes listed here are the
+substantive ones. No prompts were used to fabricate results, data, or
+quantitative claims. Quantitative claims used for cross-system comparison
+were verified against the primary sources; results marked [a] in the
+manuscript are reported as stated in source abstracts and are not
+independently verified.
+
+The authors take full responsibility for the content, accuracy, and
+completeness of the manuscript.
+
+\subsection{Literature Search and Screening}
+
+Purpose: identify candidate papers on multi-agent system diagnostics and
+infrastructure, and filter to those relevant to the survey's scope.
+
+Representative prompts:
+\begin{itemize}
+  \item ``Search for recent papers (2024--2026) on failure localization in
+        multi-agent LLM systems. For each, report title, authors, venue,
+        year, and arXiv ID if available.''
+  \item ``Find papers on observability and tracing standards for LLM
+        agents, including OpenTelemetry generative-AI semantic conventions
+        and agent trace provenance frameworks.''
+  \item ``Search for infrastructure and serving systems that optimize GPU
+        memory, KV-cache management, or scheduling specifically for
+        multi-agent workloads, not single-model inference.''
+  \item ``Identify safety guardrail systems for multi-agent LLM systems:
+        prompt injection defenses, policy verification of agent traces,
+        and topology-aware defenses.''
+  \item ``List benchmarks for evaluating agent reliability, failure
+        attribution, and safety in multi-agent systems (e.g., trace-level,
+        step-level, and safety-specific benchmarks).''
+\end{itemize}
+
+\subsection{Taxonomy Construction and Organization}
+
+Purpose: organize the identified literature into coherent categories and
+subcategories for the survey.
+
+Representative prompts:
+\begin{itemize}
+  \item ``Group these failure localization methods into paradigms
+        (statistical, LLM-guided, RL-trained). For each paradigm, note the
+        input requirements (number of executions) and attribution
+        granularity (agent/step/action).''
+  \item ``Organize observability and tracing work into three levels:
+        conceptual provenance models, standardization protocols, and
+        production tooling.''
+  \item ``Categorize multi-agent safety systems by abstraction level:
+        topology-based, policy verification, and ML-layered defenses.''
+  \item ``Structure multi-agent infrastructure systems by optimization
+        axis: memory management, prefix-aware scheduling, cache lifecycle,
+        and power management. Identify which workload characteristic each
+        axis addresses.''
+  \item ``Identify gaps: which dimensions are under-covered by existing
+        benchmarks, and where diagnostics and infrastructure systems could
+        be co-designed.''
+\end{itemize}
+
+\subsection{Draft Generation}
+
+Purpose: produce initial prose for manuscript sections, subsequently edited
+and verified by the authors.
+
+Representative prompts:
+\begin{itemize}
+  \item ``Write an abstract for a survey covering two contributions: a
+        diagnostics taxonomy (failure localization, observability, safety,
+        benchmarks) and an infrastructure challenge analysis (memory,
+        cache lifecycle, scheduling, power).''
+  \item ``Draft an introduction establishing the gap: the diagnostics and
+        infrastructure layers of multi-agent systems lack systematic joint
+        analysis. Include motivation from adoption data.''
+  \item ``Write the failure localization subsection, synthesizing
+        statistical, LLM-guided, and RL-trained approaches as three
+        paradigms, citing the provided papers.''
+  \item ``Write the infrastructure section, presenting multi-agent serving
+        challenges (sparse activation, invocation distance, shared
+        prefixes) and application-aware systems that address each.''
+  \item ``Write the discussion: open challenges, diagnostics-infrastructure
+        co-design opportunities, broader impact, limitations, and future
+        work.''
+\end{itemize}
+
+\subsection{Reference Verification}
+
+Purpose: check bibliographic metadata against authoritative sources to
+avoid citation errors and ensure all cited works are real and correctly
+attributed.
+
+Representative prompts:
+\begin{itemize}
+  \item ``For each of the following arXiv IDs, return the exact title,
+        author list, venue, and publication year as listed in the source
+        metadata. Flag any that do not resolve.''
+  \item ``Verify the venue and publication year for these conference papers
+        (ICLR, ICML, ACL, NeurIPS, COLM, EACL). Correct any year or venue
+        mismatches.''
+  \item ``Check these references for withdrawn status or known retractions.
+        Note any paper whose authors have withdrawn or retracted it.''
+  \item ``Confirm the numeric claims attributed to these papers appear in
+        the source (e.g., reported accuracy, speedup, reduction in attack
+        success rate) and report the exact value as published.''
+\end{itemize}
+
+\end{document}
