@@ -12,34 +12,6 @@
 \usepackage{booktabs}
 \usepackage{amssymb}
 \usepackage{multirow}
-\usepackage{xparse}
-\usepackage{tikz}
-\usetikzlibrary{arrows.meta,positioning,calc,fit}
-
-% The six review figures are rendered directly as TikZ vectors.  The original
-% PDF assets remain in the project as archival copies, while the existing
-% section files and figure numbering/captions remain unchanged.
-\let\frontiersOriginalIncludeGraphics\includegraphics
-\RenewDocumentCommand{\includegraphics}{s O{} m}{%
-  \def\frontiersFigureFile{#3}%
-  \ifnum\pdfstrcmp{\frontiersFigureFile}{fig1_overview.pdf}=0
-    \input{fig1_overview_tikz}%
-  \else\ifnum\pdfstrcmp{\frontiersFigureFile}{fig2_diagnostics_taxonomy.pdf}=0
-    \input{fig2_diagnostics_taxonomy_tikz}%
-  \else\ifnum\pdfstrcmp{\frontiersFigureFile}{fig3_diagnostic_pipeline.pdf}=0
-    \input{fig3_diagnostic_pipeline_tikz}%
-  \else\ifnum\pdfstrcmp{\frontiersFigureFile}{fig4_infrastructure.pdf}=0
-    \input{fig4_infrastructure_tikz}%
-  \else\ifnum\pdfstrcmp{\frontiersFigureFile}{fig5_tension.pdf}=0
-    \input{fig5_tension_tikz}%
-  \else\ifnum\pdfstrcmp{\frontiersFigureFile}{fig6_codesign_agenda.pdf}=0
-    \input{fig6_codesign_agenda_tikz}%
-  \else
-    \IfBooleanTF{#1}
-      {\frontiersOriginalIncludeGraphics*[#2]{#3}}
-      {\frontiersOriginalIncludeGraphics[#2]{#3}}%
-  \fi\fi\fi\fi\fi\fi
-}
 
 \linenumbers
 
