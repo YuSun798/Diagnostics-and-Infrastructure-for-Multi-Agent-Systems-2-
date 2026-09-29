@@ -20,9 +20,15 @@ def dwg_new(name,w,h):
     return svgwrite.Drawing(str(SRC/(name+'.svg')), size=(f'{w}px',f'{h}px'), viewBox=f'0 0 {w} {h}')
 
 def rect(d,x,y,w,h,fill=WHITE,stroke=LINE,sw=2,r=16):
+    if sw in (1.3, 1.5):
+        sw = 1.6
+    elif sw == 1.8:
+        sw = 2
     d.add(d.rect(insert=(x,y),size=(w,h),rx=r,ry=r,fill=fill,stroke=stroke,stroke_width=sw))
 
 def text(d,x,y,s,size=24,fill=NAVY,weight='normal',anchor='start',family=FONT):
+    if size in (13, 14, 15):
+        size += 1
     d.add(d.text(s,insert=(x,y),fill=fill,font_size=size,font_weight=weight,font_family=family,text_anchor=anchor))
 
 def multiline(d,x,y,lines,size=22,fill=NAVY,weight='normal',anchor='middle',gap=1.25):
@@ -33,8 +39,8 @@ def multiline(d,x,y,lines,size=22,fill=NAVY,weight='normal',anchor='middle',gap=
 
 def line(d,x1,y1,x2,y2,stroke=GRAY,sw=3,arrow=False):
     if arrow:
-        marker=d.marker(insert=(10,5),size=(10,10),orient='auto',markerUnits='strokeWidth')
-        marker.add(d.path(d='M 0 0 L 10 5 L 0 10 z',fill=stroke))
+        marker=d.marker(insert=(7,4),size=(8,8),orient='auto',markerUnits='userSpaceOnUse')
+        marker.add(d.path(d='M 0 0 L 8 4 L 0 8 z',fill=stroke))
         d.defs.add(marker)
         d.add(d.line((x1,y1),(x2,y2),stroke=stroke,stroke_width=sw,marker_end=marker.get_funciri()))
     else:
