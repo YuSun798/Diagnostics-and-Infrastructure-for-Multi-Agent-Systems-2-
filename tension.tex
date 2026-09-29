@@ -23,20 +23,20 @@ Table~\ref{tab:tension} contrasts the two layers along the dimensions that gener
 
 \begin{table*}[t]
 \centering
-\caption{The diagnostics--infrastructure tension along shared runtime resources.}
+\caption{A stylized contrast between diagnostic and infrastructure tendencies over shared runtime resources. These are design tendencies in the surveyed literature, not universal requirements.}
 \label{tab:tension}
 \footnotesize
 \setlength{\tabcolsep}{5pt}
 \begin{tabular}{@{}p{0.20\textwidth}p{0.34\textwidth}p{0.34\textwidth}@{}}
 \toprule
-\textbf{Dimension} & \textbf{Diagnostics requirement} & \textbf{Infrastructure requirement} \\
+\textbf{Dimension} & \textbf{Diagnostics tendency} & \textbf{Infrastructure tendency} \\
 \midrule
-Runtime state & Full per-step inputs, outputs, and tool logs & Only what is needed to schedule the next request \\
-Retention horizon & Retain until diagnosis completes & Discard as soon as reuse probability drops \\
-Eviction criterion & Keep low-reuse-probability states & Evict low-reuse-probability states first \\
-Granularity & Step-level and cross-agent (to localise cause) & Request- and agent-level (to place work) \\
-Overhead budget & Tolerates replay and rich capture & Bounded by serving SLO; overhead is waste \\
-Replay resources & Restorable environment snapshots & None retained \\
+Runtime state & Benefits from richer per-step inputs, outputs, and tool logs & Retains state needed for serving or expected reuse \\
+Retention horizon & Benefits from retaining evidence until diagnosis & Reclaims state when expected reuse or value becomes low \\
+Eviction criterion & May value diagnostically informative low-reuse state & Often prioritizes reuse probability and memory pressure \\
+Granularity & Often step-level and cross-agent (to localise cause) & Often request- and agent-level (to place work) \\
+Overhead budget & May tolerate replay or richer capture, especially offline & Constrained by latency, throughput, and memory SLOs \\
+Replay resources & May require restorable environment snapshots & Typically does not retain snapshots for diagnosis \\
 \bottomrule
 \end{tabular}
 \end{table*}
