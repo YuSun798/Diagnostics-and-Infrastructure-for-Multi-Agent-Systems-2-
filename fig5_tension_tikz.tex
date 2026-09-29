@@ -1,0 +1,32 @@
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[x=1cm,y=1cm,font=\sffamily]
+\definecolor{cblue}{HTML}{2F6B9A}\definecolor{cbluel}{HTML}{EAF2F8}
+\definecolor{corange}{HTML}{C77A2D}\definecolor{corangel}{HTML}{FFF3E6}
+\definecolor{cred}{HTML}{B84A4A}\definecolor{credl}{HTML}{FCECEC}
+\definecolor{cpurple}{HTML}{7A5FA3}\definecolor{cpurplel}{HTML}{F1ECF8}
+\definecolor{cgreen}{HTML}{3F8A64}\definecolor{cgreenl}{HTML}{EAF6EF}
+\definecolor{cdark}{HTML}{22313F}\definecolor{cmid}{HTML}{5B6770}
+\tikzset{side/.style={rounded corners=3mm,very thick,minimum width=3.45cm,minimum height=4.7cm,align=center},
+ card/.style={rounded corners=1.6mm,fill=white,minimum width=2.8cm,minimum height=0.74cm,align=center},
+ evidence/.style={rounded corners=1.8mm,minimum width=5.2cm,minimum height=0.68cm,align=left,text width=4.75cm,inner sep=2mm,font=\tiny}}
+\node[font=\bfseries\large,text=cdark] at (7,6.25) {THE DIAGNOSTICS--INFRASTRUCTURE RETENTION TENSION};
+\node[side,draw=cblue,fill=cbluel] (diag) at (1.95,3.35) {};
+\node[side,draw=corange,fill=corangel] (infra) at (12.05,3.35) {};
+\node[font=\bfseries\small,text=cblue,align=center] at (1.95,5.18) {DIAGNOSTICS\\\scriptsize RETAIN};
+\node[font=\bfseries\small,text=corange,align=center] at (12.05,5.18) {INFRASTRUCTURE\\\scriptsize DISCARD / RECLAIM};
+\node[card,draw=cblue!45] at (1.95,4.30) {\bfseries Failure localization\\[-1pt]\tiny\color{cmid}needs full traces / history};
+\node[card,draw=cblue!45] at (1.95,3.25) {\bfseries Observability\\[-1pt]\tiny\color{cmid}needs rich execution context};
+\node[card,draw=cblue!45] at (1.95,2.20) {\bfseries Replay / repair\\[-1pt]\tiny\color{cmid}needs restorable state};
+\node[card,draw=corange!55] at (12.05,4.30) {\bfseries Memory management\\[-1pt]\tiny\color{cmid}evict low-reuse state};
+\node[card,draw=corange!55] at (12.05,3.25) {\bfseries Scheduling\\[-1pt]\tiny\color{cmid}bound latency / overhead};
+\node[card,draw=corange!55] at (12.05,2.20) {\bfseries Cache lifecycle\\[-1pt]\tiny\color{cmid}expire / recompute state};
+\node[rounded corners=2.5mm,draw=black!40,fill=white,very thick,minimum width=5.6cm,minimum height=0.92cm,align=center] (state) at (7,5.30) {\bfseries SHARED RUNTIME STATE\\[-1pt]\scriptsize\color{cmid}retention budget: memory $\mid$ trace fidelity $\mid$ replayability};
+\draw[-{Latex[length=2mm]},very thick,cblue] (3.70,5.30) -- (state.west);
+\draw[-{Latex[length=2mm]},very thick,corange] (10.30,5.30) -- (state.east);
+\node[evidence,draw=cred,fill=credl] at (7,4.20) {\textcolor{cred}{\bfseries Cross-layer conflict 1: eviction.} ScaleSim moves inactive state off the fast path; post-hoc diagnosis values that history.};
+\node[evidence,draw=cred,fill=credl] at (7,3.20) {\textcolor{cred}{\bfseries Cross-layer conflict 2: snapshots.} Replay methods need restorable environment state that serving does not retain by default.};
+\node[evidence,draw=cpurple,fill=cpurplel] at (7,2.20) {\textcolor{cpurple}{\bfseries Intra-layer analogue: compression.} TrajAudit trades retained context for lower diagnostic cost.};
+\node[evidence,draw=black!35,fill=black!2] at (7,1.20) {\textcolor{cdark}{\bfseries Boundary condition: replay cost.} Replay becomes a serving conflict when diagnosis moves onto the online path.};
+\node[rounded corners=2mm,draw=cgreen,fill=cgreenl,minimum width=13.5cm,minimum height=0.48cm,font=\scriptsize,text=cgreen,align=center] at (7,0.25) {\bfseries Empirical anchor (TraceElephant): full traces raise step-level attribution from 16\% to 28.1\% (+76\% relative).};
+\end{tikzpicture}%
+}
