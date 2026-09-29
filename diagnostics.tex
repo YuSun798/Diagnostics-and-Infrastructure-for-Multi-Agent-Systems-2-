@@ -9,7 +9,7 @@ This section presents our taxonomy of multi-agent diagnostics, organized into fo
 
 \subsection{Failure Localization}\label{sec:diag_fl}
 
-When a multi-agent system fails, identifying the responsible agent and faulty action remains a fundamental challenge. At least a dozen failure localization methods have appeared in 2024--2026~\citep{beyondindiv2026}, and three dominant paradigms (statistical, LLM-guided, and RL-trained) have developed independently with minimal cross-citation. These paradigms differ along two axes: \emph{input requirements} (replay-based vs.\ single-execution) and \emph{attribution granularity} (agent-level, step-level, or action-level). Table~\ref{tab:failure_loc} summarizes the landscape.
+When a multi-agent system fails, identifying the responsible agent and faulty action remains a central challenge. At least a dozen failure localization methods have appeared in 2024--2026~\citep{beyondindiv2026}, and three dominant paradigms (statistical, LLM-guided, and RL-trained) have developed independently with minimal cross-citation. These paradigms differ along two axes: \emph{input requirements} (replay-based vs.\ single-execution) and \emph{attribution granularity} (agent-level, step-level, or action-level). Table~\ref{tab:failure_loc} summarizes the landscape.
 
 \paragraph*{Statistical approaches}
 These methods apply spectrum-based fault localization (SBFL) to multi-agent traces. FAMAS~\citep{famas2025} replays trajectories $k=20$ times and applies four suspiciousness metrics (action coverage, failure entropy, temporal decay, Kulczynski2), achieving 66\% top-1 action-level accuracy on the 82-failure replayable subset of Who\&When~\citep{famas2025}. Complementary statistical methods extend SBFL without replays: CausalFlow~\citep{flatlogs2026} constructs hierarchical causal graphs (36.2\% step accuracy, abstract-verified) and StepFinder~\citep{stepfinder2026} applies temporal semantic analysis (+10.35pp, abstract-verified). Zero-replay debugging~\citep{zeroreplay2026} eliminates replay overhead entirely through knowledge-based reasoning (abstract-verified).
@@ -50,7 +50,6 @@ EAGER & Contrastive & System & --- & --- & prelim. [a] & 2 & $\circ$ \\
 \end{table*}
 \vspace{-2pt}
 {\footnotesize \emph{Non-comparability.} The ``Key Result'' column aggregates measurements taken on different benchmarks (Who\&When, RootSE, or task-specific sets), under different observability settings (output-only vs.\ full traces), and against different baselines. Methods also differ in what they require at inference time (replay budget, training, token cost). The rows therefore describe a landscape of approaches, not a ranked comparison; no cross-row ranking should be inferred. Pub.\ records the publication venue only and is not a quality judgement.}
-
 
 \subsection{Observability and Tracing}\label{sec:diag_obs}
 
@@ -94,7 +93,6 @@ ReGuard & Reactive & --- & 2 & $\circ$ \\
 \par\vspace{2pt}{\footnotesize $^\dagger$Venue-published; not page-level verified.}
 \end{table*}
 
-
 \subsection{Safety and Reliability}\label{sec:diag_safety}
 
 Multi-agent safety poses a distinct challenge: attacks propagate through inter-agent communication, so a single compromised agent can corrupt downstream outputs~\citep{safellmagentsurvey2026, trustworthyagents2025}. Recent surveys identify this cross-agent propagation as the defining difference from single-agent safety~\citep{fullstacksafety2025}. Three paradigms have emerged, each at a different abstraction level. We follow the literature's convention of treating safety as a diagnostic subcategory; as \S\ref{sec:discussion} argues, this placement is contestable, because a guardrail must both inspect state and act on the serving path.
@@ -106,7 +104,6 @@ Multi-agent safety poses a distinct challenge: attacks propagate through inter-a
 \emph{ML-layered} defenses stack classifiers. LlamaFirewall~\citep{llamafirewall2025} layers PromptGuard2 (AUC 0.98) with an alignment verifier, reducing attack success from 17.6\% to 1.75\%. AGrail~\citep{agrail2025} introduces lifelong adaptive guardrails that evolve with agent deployment (abstract-verified), and GuardAgent~\citep{guardagent2024} enables knowledge-based guardrail reasoning (abstract-verified).
 
 Complementary systems span pre-execution alignment (AgentDoG~\citep{agentdog2026}), control-theoretic recovery (ReGuard~\citep{pandya2025}), and automated auditing (AgentAuditor~\citep{agentauditor2025}, NeurIPS 2025). Safety benchmarks include GuardianAgentBench~\citep{guardianagentbench2026} (580 scenarios), OSGuard~\citep{osguard2026} (2.7\% FPR), Agent-SafetyBench~\citep{agentsafetybench2024}, and AgentHarm~\citep{agentharm2024} (all abstract-verified).
-
 
 \subsection{Benchmarks}\label{sec:diag_bench}
 
@@ -138,7 +135,9 @@ BenchGuard & --- & --- & Meta & 2 & $\circ$ \\
 \end{tabular}
 \end{table*}
 
-No benchmark evaluates diagnostics-infrastructure interaction: how diagnostic overhead affects serving performance, or how infrastructure anomalies propagate to diagnostic signals.
+Among the benchmarks surveyed here, none evaluates diagnostics--infrastructure interaction: how diagnostic overhead affects serving performance, or how retention and serving policies affect diagnostic fidelity.
+
+\paragraph*{Diagnostics synthesis.} Across the four diagnostic subcategories, the common dependency is retained execution evidence: localization methods require traces or replays, observability determines what evidence exists, and safety mechanisms must inspect enough context to intervene. The literature is broad but methodologically heterogeneous, so the taxonomy is most useful for comparing assumptions---trace fidelity, replay budget, granularity, and intervention timing---rather than headline accuracy across rows. This shared dependence on runtime evidence motivates the retention analysis in \S\ref{sec:tension}.
 
 \begin{figure*}[t]
 \centering
