@@ -19,12 +19,15 @@ FONT='DejaVu Sans, Arial, sans-serif'
 def dwg_new(name,w,h):
     return svgwrite.Drawing(str(SRC/(name+'.svg')), size=(f'{w}px',f'{h}px'), viewBox=f'0 0 {w} {h}')
 
-def rect(d,x,y,w,h,fill=WHITE,stroke=LINE,sw=2,r=16):
+def rect(d,x,y,w,h,fill=WHITE,stroke=LINE,sw=2,r=16,dashed=False):
     if sw in (1.3, 1.5):
         sw = 1.6
     elif sw == 1.8:
         sw = 2
-    d.add(d.rect(insert=(x,y),size=(w,h),rx=r,ry=r,fill=fill,stroke=stroke,stroke_width=sw))
+    kwargs=dict(insert=(x,y),size=(w,h),rx=r,ry=r,fill=fill,stroke=stroke,stroke_width=sw)
+    if dashed:
+        kwargs['stroke_dasharray']='8,6'
+    d.add(d.rect(**kwargs))
 
 def text(d,x,y,s,size=24,fill=NAVY,weight='normal',anchor='start',family=FONT):
     if size in (13, 14, 15):
@@ -50,28 +53,36 @@ def save(d,name):
     svg=str(SRC/(name+'.svg')); pdf=str(ROOT/(name+'.pdf'))
     d.save(); cairosvg.svg2pdf(url=svg,write_to=pdf)
 
-name='fig1_overview'; W,H=1400,520; d=dwg_new(name,W,H)
+# Figure 1: aligned review-scope stack. Orchestration is contextual (gray dashed),
+# while Diagnostics (§3) and Infrastructure (§4) use matched sub-box layouts.
+name='fig1_overview'; W,H=1400,570; d=dwg_new(name,W,H)
 text(d,55,48,'MULTI-AGENT RUNTIME STACK',34,NAVY,'bold'); text(d,1345,48,'Review scope',24,GRAY,'bold','end')
-rect(d,55,70,1290,105,PALE,'#7A8793',3,22); text(d,80,105,'ORCHESTRATION LAYER',26,NAVY,'bold'); text(d,1320,105,'well surveyed elsewhere',20,GRAY,'normal','end')
+rect(d,55,70,1290,105,PALE,'#7A8793',3,22,True); text(d,80,105,'ORCHESTRATION LAYER',26,NAVY,'bold'); text(d,1320,105,'context only · well surveyed elsewhere',20,GRAY,'normal','end')
 for x,w,title,sub in [(80,380,'Workflow frameworks','LangGraph / CrewAI'),(510,380,'Agent orchestration','coordination / routing'),(940,380,'Multi-agent SDKs','execution / tools')]:
     rect(d,x,118,w,44,WHITE,LINE,1.5,10); text(d,x+w/2,144,title,20,NAVY,'bold','middle'); text(d,x+w/2,166,sub,15,GRAY,'normal','middle')
-rect(d,55,195,1290,120,BLUE_L,BLUE,3,22); text(d,80,230,'DIAGNOSTICS LAYER',26,BLUE,'bold'); text(d,1320,230,'retain evidence for diagnosis',19,BLUE,'bold','end')
-items=[('Failure localization','responsible agent / step'),('Observability','traces / provenance'),('Safety','guardrails / intervention'),('Benchmarks','failure / reliability')]
-for i,(a,b) in enumerate(items):
-    x=78+i*315; rect(d,x,244,285,55,WHITE,'#B8D0E4',1.5,10); text(d,x+142.5,267,a,19,NAVY,'bold','middle'); text(d,x+142.5,290,b,14,GRAY,'normal','middle')
+
+rect(d,55,195,1290,120,BLUE_L,BLUE,3,22); text(d,80,230,'DIAGNOSTICS LAYER  (§3)',26,BLUE,'bold'); text(d,1320,230,'retain evidence for diagnosis',19,BLUE,'bold','end')
+diag=[('Failure localization · §3.1','responsible agent / step'),('Observability · §3.2','traces / provenance'),('Safety · §3.3','guardrails / intervention'),('Benchmarks · §3.4','failure / reliability')]
+for i,(a,b) in enumerate(diag):
+    x=78+i*315; rect(d,x,244,285,55,WHITE,'#B8D0E4',1.5,10); text(d,x+142.5,267,a,18,NAVY,'bold','middle'); text(d,x+142.5,290,b,14,GRAY,'normal','middle')
+
 rect(d,285,335,830,74,'#FFFDF5','#AEB4B8',3,18); text(d,700,365,'SHARED RUNTIME STATE / RETENTION BUDGET',25,'#111111','bold','middle'); text(d,700,393,'traces  |  KV state  |  environment snapshots  |  execution context',17,GRAY,'normal','middle')
 text(d,240,374,'retain',18,BLUE,'bold','end'); line(d,250,368,283,368,BLUE,3,True); text(d,1160,374,'discard / reclaim',18,ORANGE,'bold'); line(d,1117,368,1148,368,ORANGE,3,True)
-rect(d,55,430,1290,70,ORANGE_L,ORANGE,3,22); text(d,80,462,'INFRASTRUCTURE LAYER',25,ORANGE,'bold'); text(d,1320,462,'serve within memory / latency / power budgets',18,ORANGE,'bold','end')
-for x,a,b in [(600,'Memory','evict / prefetch'),(790,'Scheduling','place / prioritize'),(980,'Cache lifecycle','reuse / TTL'),(1175,'Power','resource states')]: text(d,x,480,a,18,NAVY,'bold','middle'); text(d,x,496,b,13,GRAY,'normal','middle')
+
+rect(d,55,435,1290,120,ORANGE_L,ORANGE,3,22); text(d,80,470,'INFRASTRUCTURE LAYER  (§4)',26,ORANGE,'bold'); text(d,1320,470,'serve within memory / latency / power budgets',19,ORANGE,'bold','end')
+infra=[('Memory optimization · §4.2','prefetch / eviction'),('Prefix-aware scheduling · §4.2','place / route'),('Cache lifecycle · §4.2','reuse / TTL'),('Power management · §4.2','resource states')]
+for i,(a,b) in enumerate(infra):
+    x=78+i*315; rect(d,x,484,285,55,WHITE,'#E7BE91',1.5,10); text(d,x+142.5,507,a,17,NAVY,'bold','middle'); text(d,x+142.5,530,b,14,GRAY,'normal','middle')
 save(d,name)
 
-name='fig2_diagnostics_taxonomy'; W,H=1400,620; d=dwg_new(name,W,H); text(d,700,48,'MULTI-AGENT DIAGNOSTICS: TAXONOMY',32,NAVY,'bold','middle')
+# Figure 2: landscape (what functions/systems exist), distinct from Figure 3's process view.
+name='fig2_diagnostics_taxonomy'; W,H=1400,620; d=dwg_new(name,W,H); text(d,700,48,'MULTI-AGENT DIAGNOSTICS: LANDSCAPE',32,NAVY,'bold','middle')
 cols=[(60,RED,RED_L,'Failure localization',[('Statistical','FAMAS ★'),('LLM-guided','TrajAudit ★'),('RL-trained','AgenTracer ★')]),(400,TEAL,TEAL_L,'Observability',[('Provenance','Agent Traces ★'),('Standards','OpenTelemetry'),('Tooling','LangSmith / AgentTrace')]),(740,PURPLE,PURPLE_L,'Safety',[('Topology-based','G-Safeguard ★'),('Policy verification','ShieldAgent ★'),('ML-layered','LlamaFirewall')]),(1080,BLUE,BLUE_L,'Benchmarks',[('Trace fidelity','TraceElephant ★'),('Software engineering','RootSE ★'),('General MAS','Who&When')])]
 for x,c,cl,title,rows in cols:
     rect(d,x,80,280,470,cl,c,3,20); multiline(d,x+140,122,title.split(' '),24,c,'bold','middle',1.05); y=185
     for a,b in rows:
         rect(d,x+20,y,240,86,WHITE,c,1.5,12); text(d,x+140,y+34,a,20,NAVY,'bold','middle'); text(d,x+140,y+62,b,15,GRAY,'normal','middle'); y+=105
-text(d,700,590,'★ full-text verified in the review evidence coding; unstarred entries are abstract-verified or contextual.',15,GRAY,'normal','middle'); save(d,name)
+text(d,700,590,'★ Tier 1 (1a or 1b; see §2); unstarred entries are Tier 2 or contextual Tier 3.',15,GRAY,'normal','middle'); save(d,name)
 
 name='fig3_diagnostic_pipeline'; W,H=1400,590; d=dwg_new(name,W,H); text(d,700,48,'END-TO-END DIAGNOSTIC PIPELINE',32,NAVY,'bold','middle')
 stages=[(60,BLUE,BLUE_L,'1  AGENT EXECUTION',[('A1  A2  A3  A4',18),('multi-agent trajectory',14),('task • tools • messages',14)]),(385,TEAL,TEAL_L,'2  TRACE CAPTURE',[('agent / step / tool',17),('observation + action',17),('causal / timing context',17)]),(710,PURPLE,PURPLE_L,'3  FAILURE LOCALIZATION',[('Statistical',17),('LLM-guided',17),('RL-trained',17)]),(1035,RED,RED_L,'4  ROOT-CAUSE OUTPUT',[('faulty agent',17),('faulty step / action',17),('supporting evidence',17)])]
