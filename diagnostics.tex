@@ -1,15 +1,15 @@
-This section presents our taxonomy of multi-agent diagnostics, organized into four subcategories: failure localization (\S\ref{sec:diag_fl}), observability (\S\ref{sec:diag_obs}), safety (\S\ref{sec:diag_safety}), and benchmarks (\S\ref{sec:diag_bench}). Figure~\ref{fig:taxonomy} provides a visual overview, and Figure~\ref{fig:pipeline} illustrates the end-to-end diagnostic pipeline from agent execution through failure localization to root cause output.
+This section presents our taxonomy of multi-agent diagnostics, organized into four subcategories: failure localization (\S\ref{sec:diag_fl}), observability (\S\ref{sec:diag_obs}), safety (\S\ref{sec:diag_safety}), and benchmarks (\S\ref{sec:diag_bench}). Figure~\ref{fig:taxonomy} maps the landscape of diagnostic functions and representative systems, whereas Figure~\ref{fig:pipeline} provides a complementary process view showing where tracing, localization, root-cause output, and safety act along execution.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.9\textwidth]{fig2_diagnostics_taxonomy.pdf}
-\caption{Taxonomy of multi-agent diagnostics systems across four subcategories. Stars ($\star$) mark Tier~1 systems; unmarked leaves are Tier~2 (abstract-verified) or, for standards and tooling, Tier~3. The tier rule and the 1a/1b split are given in \S\ref{sec:background}.}
+\caption{Landscape of multi-agent diagnostics across four subcategories. Stars ($\star$) mark Tier~1 systems (Tier~1a or 1b); unmarked leaves are Tier~2 (abstract-verified) or, for standards and tooling, Tier~3. The tier rule and the 1a/1b split are given in \S\ref{sec:background}.}
 \label{fig:taxonomy}
 \end{figure*}
 
 \subsection{Failure Localization}\label{sec:diag_fl}
 
-When a multi-agent system fails, identifying the responsible agent and faulty action remains a central challenge. At least a dozen failure localization methods have appeared in 2024--2026~\citep{beyondindiv2026}. We group the surveyed methods into three recurring paradigms---statistical, LLM-guided, and RL-trained---that use distinct methodological assumptions and evaluation conventions. These paradigms differ along two axes: \emph{input requirements} (replay-based vs.\ single-execution) and \emph{attribution granularity} (agent-level, step-level, or action-level). Table~\ref{tab:failure_loc} summarizes the landscape.
+When a multi-agent system fails, identifying the responsible agent and faulty action remains a central challenge. Our surveyed set contains twelve failure-localization methods from 2024--2026. We group them into three recurring paradigms---statistical, LLM-guided, and RL-trained---that use distinct methodological assumptions and evaluation conventions. These paradigms differ along two axes: \emph{input requirements} (replay-based vs.\ single-execution) and \emph{attribution granularity} (agent-level, step-level, or action-level). Table~\ref{tab:failure_loc} summarizes the landscape.
 
 \paragraph*{Statistical approaches}
 These methods apply spectrum-based fault localization (SBFL) to multi-agent traces. FAMAS~\citep{famas2025} replays trajectories $k=20$ times and applies four suspiciousness metrics (action coverage, failure entropy, temporal decay, Kulczynski2), achieving 66\% top-1 action-level accuracy on the 82-failure replayable subset of Who\&When~\citep{famas2025}. Complementary statistical methods extend SBFL without replays: CausalFlow~\citep{flatlogs2026} constructs hierarchical causal graphs (36.2\% step accuracy, abstract-verified) and StepFinder~\citep{stepfinder2026} applies temporal semantic analysis (+10.35pp, abstract-verified). Zero-replay debugging~\citep{zeroreplay2026} eliminates replay overhead entirely through knowledge-based reasoning (abstract-verified).
@@ -142,6 +142,6 @@ Among the benchmarks surveyed here, none evaluates diagnostics--infrastructure i
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{fig3_diagnostic_pipeline.pdf}
-\caption{End-to-end diagnostic pipeline for multi-agent systems. Execution traces are collected via observability infrastructure, then processed through three failure localization paradigms (statistical, LLM-guided, RL-trained) to produce root cause attribution. A safety layer operates continuously alongside execution.}
+\caption{Process view of multi-agent diagnostics. Execution traces are collected through observability infrastructure, then processed through failure localization to produce root-cause attribution, while safety mechanisms may operate continuously alongside execution. This figure complements the landscape in Figure~\ref{fig:taxonomy}: it shows when diagnostic functions act rather than reclassifying the systems.}
 \label{fig:pipeline}
 \end{figure*}
