@@ -1,5 +1,6 @@
 name: Render review figures
 
+# Regenerate vector figures after final Figure 6 label verification.
 on:
   push:
     paths:
