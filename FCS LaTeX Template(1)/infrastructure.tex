@@ -1,0 +1,72 @@
+Most LLM serving systems were designed around request-level inference and expose only part of the structure available in multi-agent workloads. We identify three multi-agent serving challenges (Section~\ref{sec:infra_challenges}), analyze application-aware systems that exploit them (Section~\ref{sec:infra_scalesim}), and map the broader infrastructure landscape (Section~\ref{sec:infra_landscape}).
+
+\subsection{Multi-Agent Serving Challenges}\label{sec:infra_challenges}
+
+Single-model serving systems (vLLM~\cite{kwon2023}, SGLang~\cite{sglang2024}, DistServe~\cite{distserve2024}) primarily optimize request execution, although peer-reviewed work has begun to expose application structure: Parrot~\cite{parrot2024} passes an application-level dependency graph (semantic variables) to the scheduler, Preble~\cite{preble2025} optimizes distributed prompt sharing, Sarathi-Serve~\cite{sarathi2024} introduces chunked prefill, InferCept~\cite{infercept2024} retains KV state across tool-call interruptions, and S-LoRA~\cite{slora2024} and dLoRA~\cite{dlora2024} serve many concurrent adapters. These systems approach agentic serving from the general side; we return to how they differ from agent-native designs in Section~\ref{sec:tension}. We highlight three workload properties that are particularly relevant to multi-agent execution (cf. the broader KV-cache management landscape surveyed by \cite{kvcachesurvey2026}).
+
+\textbf{Sparse activation.} Only a fraction of agents invoke the LLM at any moment: a 1,000-agent simulation may have fewer than 10 actively generating tokens~\cite{zhou2026}. Under such workloads, keeping all agent state on the fastest memory tier can waste scarce accelerator memory.
+
+\textbf{Invocation distance.} Many workloads have structured activation patterns such as sequential queues, event-driven messaging, and dependency graphs. The temporal gap before an agent's next call, termed \emph{invocation distance}~\cite{zhou2026}, can be estimated from application semantics in structured workloads but is not generally visible to request-level schedulers.
+
+\textbf{Inter-agent memory sharing.} Agents may share context such as system prompts, environment descriptions, and tool schemas, and general serving systems already reuse such prefixes once they appear: SGLang's RadixAttention and vLLM's automatic prefix caching both do this. The additional opportunity in agentic systems is to use application-level future call structure (dependency graphs, message queues, or execution order) to guide prefetching and eviction. TokenDance~\cite{tokendance2026} proposes collective KV-cache sharing across agents, DroidSpeak~\cite{droidspeak2024} enables cache reuse across different model variants, KVFlow~\cite{kvflow2025} exploits an agent step graph to evict workflow-aware and prefetch ahead of the predicted next call, and KVCOMM~\cite{kvcomm2025} aligns cache offsets across divergent per-agent prefixes so that cross-agent reuse survives the prefix change (all abstract-verified). Persistent agent-memory systems (for example A-MEM and the Mesh Memory Protocol) address a related but distinct problem, long-term memory representation rather than serving-time cache reuse, and are outside our scope.
+
+\subsection{Application-Aware Serving}\label{sec:infra_scalesim}
+
+Recent systems show how multi-agent or agentic workload structure can be exploited across four optimization axes: memory optimization, prefix-aware scheduling, cache lifecycle, and power management.
+
+\paragraph*{Memory optimization via invocation distance.}
+ScaleSim~\cite{zhou2026} introduces invocation distance as a first-class scheduling primitive. Two mechanisms exploit predictions: \emph{proactive prefetching} loads agent states before they are needed, and \emph{distance-aware eviction} replaces LRU with future-need predictions, achieving up to 1.74$\times$ speedup over SGLang~\cite{zhou2026}. Its limitation is predictable simulation workloads; interactive agents are less structured.
+
+\paragraph*{Prefix-aware scheduling.}
+TokenCake~\cite{tokencake2025} and TOPAS~\cite{topas2026} exploit shared prefixes across agents. TokenCake reports 47\% latency reduction and 16.9\% memory improvement over vLLM (abstract-verified). These figures are reported as stated by the source and are not comparable to ScaleSim's verified up to 1.74$\times$, since the two measure different quantities on different workloads. ForkKV~\cite{forkkv2026} introduces copy-on-write semantics for disaggregated KV caches, which allows efficient prefix sharing without redundant copies (abstract-verified). Prediction-based KV-cache management~\cite{predkvcache2026} applies learned policies to anticipate cache needs (abstract-verified).
+
+\paragraph*{Cache lifecycle and power management.}
+Continuum~\cite{continuum2025} introduces KV cache TTL policies for interactive tool-calling agents with unpredictable pauses (abstract-verified). KAIROS~\cite{kairos2026} introduces context-aware power management adapting GPU power states to agentic workload phases (abstract-verified). Together with ScaleSim and TokenCake, these systems illustrate that multi-agent serving exposes optimization opportunities along multiple axes; in the surveyed set, coverage remains partial rather than end-to-end.
+
+\subsection{System Landscape}\label{sec:infra_landscape}
+
+Table~\ref{tab:infrastructure} summarizes the broader infrastructure landscape. Beyond the application-aware systems above, infrastructure-aware orchestration (INFRAMIND~\cite{inframind2026}) bridges scheduling and placement decisions (abstract-verified). Autellix~\cite{autellix2025} provides a dedicated serving engine for LLM agents (abstract-verified), and policy-driven runtime layers~\cite{policyruntime2026} and persistent agent memory~\cite{agentmemory2026} address the system-level integration gap. Baseline serving (vLLM~\cite{kwon2023}, SGLang~\cite{sglang2024}, FlexGen~\cite{flexgen2023}) and disaggregated approaches (DistServe~\cite{distserve2024}) provide the foundation, and Mooncake~\cite{mooncake2025} extends disaggregation to a cluster-wide KV-cache pool, reporting large capacity gains under SLO on production Kimi traffic (abstract-verified). An IEEE survey~\cite{latencysurvey2026} proposes a four-layer latency optimization taxonomy, and the model-native computing architecture~\cite{modelnative2026} reconsiders the full system stack for foundation model workloads (both abstract-verified).
+
+\paragraph*{Synthesis.} The recurring pattern is that agent-specific infrastructure gains come from exposing structure that request-level serving would otherwise treat as opaque: future invocation order, shared prefixes, idle phases, and cache lifetime. Evidence remains uneven---ScaleSim is our full-text case study, while most other agent-specific systems are abstract-verified---so we treat the four axes as a map of design directions rather than a performance ranking. Within the surveyed set, we did not identify a system that jointly optimizes all four axes or uses diagnostic signals as a first-class serving input; this motivates the cross-layer analysis in Section~\ref{sec:tension}.
+
+\begin{table*}[t]
+\centering
+\caption{Multi-agent infrastructure systems. [a] = abstract-verified. \textbf{Pub.}: $\checkmark$ = peer-reviewed venue, $\circ$ = preprint / no confirmed venue, --- = no publication (platform/docs). Pub.\ records the venue only and is not a quality judgement.}
+\label{tab:infrastructure}
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}llcc@{}}
+\toprule
+\textbf{System} & \textbf{Category} & \textbf{Tier} & \textbf{Pub.} \\
+\midrule
+ScaleSim & Memory mgmt. & 1 & $\circ$ \\
+TokenCake & KV-cache sched. & 2 & $\circ$ \\
+TOPAS & Prefix-aware & 2 & $\circ$ \\
+KVFlow & Prefix KV-cache & 2 & $\circ$ \\
+ForkKV & Copy-on-write KV & 2 & $\circ$ \\
+Continuum & Cache lifecycle & 2 & $\circ$ \\
+KAIROS & Power mgmt. & 2 & $\circ$ \\
+TokenDance & KV sharing & 2 & $\circ$ \\
+DroidSpeak & Cross-LLM KV & 2 & $\circ$ \\
+Autellix & Agent serving & 2 & $\circ$ \\
+INFRAMIND & Infra-aware & 2 & $\circ$ \\
+KVCOMM & Cross-agent KV & 2 & $\checkmark$ \\
+Mooncake & KV-cache pool & 2 & $\checkmark$ \\
+Parrot & App-level DAG & 2 & $\checkmark$ \\
+InferCept & KV intercept & 2 & $\checkmark$ \\
+Sarathi-Serve & Chunked prefill & 2 & $\checkmark$ \\
+Preble & Prompt sharing & 2 & $\checkmark$ \\
+S-LoRA & Multi-adapter & 2 & $\checkmark$ \\
+dLoRA & Adapter orch. & 2 & $\checkmark$ \\
+vLLM & Baseline serving & 2 & $\checkmark$ \\
+SGLang & Baseline serving & 2 & $\checkmark$ \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.8\textwidth]{figure4.png}
+\caption{Multi-agent serving challenges and optimization axes. Three workload characteristics---sparse activation, invocation distance, and inter-agent memory sharing---motivate four families of application-aware systems spanning memory optimization, prefix-aware scheduling, cache lifecycle, and power management. The figure maps coverage in the surveyed set; it is not a claim that one system should optimize every axis simultaneously.}
+\label{fig:infra_axes}
+\end{figure*}
