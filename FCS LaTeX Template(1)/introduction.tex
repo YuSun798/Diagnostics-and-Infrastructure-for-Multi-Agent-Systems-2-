@@ -1,0 +1,42 @@
+Foundation model-based multi-agent systems (MAS), in which multiple Large Language Model (LLM) agents collaborate to solve complex tasks~\cite{metagpt2024, camel2023, chatdev2024}, are increasingly moving from demonstrations toward deployed workflows. A vendor survey reports that 72\% of organizations are actively using or testing multi-agent AI systems~\cite{zapier2025} (Tier-3 vendor data, reported as stated). As systems such as MetaGPT~\cite{metagpt2024}, Internet of Agents~\cite{ioa2025}, and Graph-of-Agents~\cite{graphofagents2026} become more architecturally sophisticated, reliability and efficiency depend on operational layers that are less mature than orchestration itself. We focus on two of them: the \emph{diagnostics layer}, which supports failure localization, observability, and safety, and the \emph{infrastructure layer}, which manages memory, scheduling, and resources for multi-agent workloads.
+
+Existing surveys largely treat these concerns separately. Orchestration frameworks (LangGraph, CrewAI, AutoGen) have received substantial survey attention~\cite{zhu2026orchestration}, as have offline agent evaluation~\cite{evalbenchmark2025, evalagents2026, llmbenchsurvey2025}, safety~\cite{safellmagentsurvey2026, trustworthyagents2025}, AgentOps~\cite{agentopssurvey2025, agentopscsiro2024, architectingops2026}, and single-model serving and latency optimization~\cite{latencysurvey2026}. In our curated corpus, we count 45 systems across our own tables\footnote{Counted across our own system tables: 12 failure-localization methods, 12 observability and safety systems, and 21 infrastructure systems. Benchmarks (8) and comparator surveys (6) are excluded.}. The resulting literature exposes complementary pieces of the runtime stack, but the relationship between the state required for diagnosis and the state managed by serving policies remains under-analyzed.
+
+This review therefore brings the two operational layers into one frame. Table~\ref{tab:surveys} contrasts our scope against six adjacent surveys. General agent surveys~\cite{li2024, abouali2025, wang2026classical, tran2025} cover architectural patterns and collaboration mechanisms; \cite{beyondindiv2026} surveys collaboration and failure but not serving infrastructure; and \cite{li2024} uses ``infrastructure'' for the workflow layer rather than runtime memory, scheduling, cache lifecycle, or power. In the surveyed literature, we did not find a review that jointly organizes runtime diagnostics and multi-agent serving infrastructure while also making the verification depth of quantitative claims explicit.
+
+This is a curated critical review rather than a systematic review. The inclusion boundary, evidence-selection rules, and verification tiers are described in Section~\ref{sec:background}. Quantitative claims used for comparison come from full-text sources; abstract-level results are marked \emph{[a]} and are not used to compute cross-system deltas or rankings. Figure~\ref{fig:overview} illustrates the scope.
+
+\begin{table*}[t]
+\centering
+\caption{Comparison with existing surveys. $\bullet$ = covered, $\circ$ = not covered. $^a$A 2026 survey of MAS collaboration and failure; it organises failure conceptually and does not catalogue system-level localization methods or cover infrastructure. $^b$A 2024 survey covering workflow and architecture; its ``infrastructure'' is at that level, not multi-agent serving (memory, scheduling, cache lifecycle, power). ``Quant.'' denotes that the survey reports quantitative results for the systems it reviews, at the verification depth described in Section~\ref{sec:background}; it does not imply that those numbers are compared across systems. \textbf{Pub.}: $\checkmark$ = peer-reviewed venue, $\circ$ = preprint, --- = not a publication. Pub.\ records the venue only and is not a quality judgement.}
+\label{tab:surveys}
+\footnotesize
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{@{}llcccccc@{}}
+\toprule
+\textbf{Survey} & \textbf{Year} & \textbf{Venue} & \textbf{Orch.} & \textbf{Diag.} & \textbf{Infra} & \textbf{Quant.} & \textbf{Pub.} \\
+\midrule
+Zhu et al. & 2026 & Future Internet & $\bullet$ & $\circ$ & $\circ$ & $\circ$ & $\checkmark$ \\
+AgentOps & 2025 & preprint & $\circ$ & $\bullet$ & $\circ$ & $\circ$ & $\circ$ \\
+Mohammadi et al. & 2025 & ACM KDD & $\circ$ & $\circ$ & $\circ$ & $\circ$ & $\checkmark$ \\
+Latency survey & 2026 & IEEE Access & $\circ$ & $\circ$ & $\bullet$ & $\circ$ & $\checkmark$ \\
+Qi et al.$^a$ & 2026 & preprint & $\circ$ & $\bullet$ & $\circ$ & $\circ$ & $\circ$ \\
+Li et al.$^b$ & 2024 & Vicinagearth & $\circ$ & $\circ$ & $\circ$ & $\circ$ & $\checkmark$ \\
+\textbf{Ours} & 2026 & --- & $\circ$ & $\bullet$ & $\bullet$ & $\bullet$ & --- \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.8\textwidth]{figure1.png}
+\caption{Survey scope: the multi-agent runtime stack. We review the diagnostics layer (Section~\ref{sec:diagnostics}) and the infrastructure layer (Section~\ref{sec:infrastructure}); the orchestration layer is shown for context and is well-covered by existing surveys. The shared runtime-state band marks the retention tension analyzed in Section~\ref{sec:tension}.}
+\label{fig:overview}
+\end{figure*}
+
+Our contributions are:
+\begin{enumerate}
+\item \textbf{Diagnostics taxonomy.} We organize multi-agent diagnostics into four subcategories spanning failure localization (Section~\ref{sec:diag_fl}), observability (Section~\ref{sec:diag_obs}), safety (Section~\ref{sec:diag_safety}), and benchmarks (Section~\ref{sec:diag_bench}), covering three failure-localization paradigms (statistical, LLM-guided, RL-trained) and three safety paradigms (topology-based, policy verification, ML-layered).
+\item \textbf{Infrastructure challenge analysis.} We identify three multi-agent workload characteristics---sparse activation, invocation distance, and inter-agent memory sharing---that are only partially exposed to general-purpose serving policies, and synthesize application-aware systems spanning memory optimization (ScaleSim, up to 1.74$\times$ speedup~\cite{zhou2026}), prefix-aware scheduling (TokenCake~\cite{tokencake2025}), cache lifecycle (Continuum), and power management (KAIROS).
+\item \textbf{Cross-layer tension analysis.} We synthesize a cross-layer retention tension: diagnostics benefits from preserving runtime evidence, while serving infrastructure benefits from reclaiming state under memory and latency budgets. We connect this tension to observed mechanisms in the surveyed systems and derive four co-design opportunities that are made testable in Section~\ref{sec:discussion}.
+\end{enumerate}
