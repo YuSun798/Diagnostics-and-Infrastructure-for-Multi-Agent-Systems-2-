@@ -1,0 +1,147 @@
+This section presents our taxonomy of multi-agent diagnostics, organized into four subcategories: failure localization (Section~\ref{sec:diag_fl}), observability (Section~\ref{sec:diag_obs}), safety (Section~\ref{sec:diag_safety}), and benchmarks (Section~\ref{sec:diag_bench}). Figure~\ref{fig:taxonomy} maps the landscape of diagnostic functions and representative systems, whereas Figure~\ref{fig:pipeline} provides a complementary process view showing where tracing, localization, root-cause output, and safety act along execution.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.8\textwidth]{figure2.png}
+\caption{Landscape of multi-agent diagnostics across four subcategories. Stars ($\star$) mark Tier~1 systems (Tier~1a or 1b); unmarked leaves are Tier~2 (abstract-verified) or, for standards and tooling, Tier~3. The tier rule and the 1a/1b split are given in Section~\ref{sec:background}.}
+\label{fig:taxonomy}
+\end{figure*}
+
+\subsection{Failure Localization}\label{sec:diag_fl}
+
+When a multi-agent system fails, identifying the responsible agent and faulty action remains a central challenge. Our surveyed set contains twelve failure-localization methods from 2024--2026. We group them into three recurring paradigms---statistical, LLM-guided, and RL-trained---that use distinct methodological assumptions and evaluation conventions. These paradigms differ along two axes: \emph{input requirements} (replay-based vs.\ single-execution) and \emph{attribution granularity} (agent-level, step-level, or action-level). Table~\ref{tab:failure_loc} summarizes the landscape.
+
+\paragraph*{Statistical approaches}
+These methods apply spectrum-based fault localization (SBFL) to multi-agent traces. FAMAS~\cite{famas2025} replays trajectories $k=20$ times and applies four suspiciousness metrics (action coverage, failure entropy, temporal decay, Kulczynski2), achieving 66\% top-1 action-level accuracy on the 82-failure replayable subset of Who\&When~\cite{famas2025}. Complementary statistical methods extend SBFL without replays: CausalFlow~\cite{flatlogs2026} constructs hierarchical causal graphs (36.2\% step accuracy, abstract-verified) and StepFinder~\cite{stepfinder2026} applies temporal semantic analysis (+10.35pp, abstract-verified). Zero-replay debugging~\cite{zeroreplay2026} eliminates replay overhead entirely through knowledge-based reasoning (abstract-verified).
+
+\paragraph*{LLM-guided approaches}
+These treat diagnosis as a reasoning task. TrajAudit~\cite{trajaudit2026} deploys an LLM investigator with Semantic Saliency Folding (SSF, 86--92\% token reduction) and Prior Failure Reasoning (PFR), achieving +24.7pp step-level accuracy on RootSE (93 failures); ablation confirms SSF as critical ($-$11.4\% vs.\ $-$3.5\% for PFR)~\cite{trajaudit2026}. The LLM-guided family has rapidly diversified: AgentRx~\cite{agentrx2026} provides domain-agnostic diagnosis (+23.6pp step, +22.9pp category accuracy), TRAIL~\cite{trail2025} combines trace reasoning with issue localization, RAFFLES~\cite{raffles2026} applies reasoning-based attribution (EACL 2026), and AgentLocate~\cite{agentlocate2026} adds multi-perspective verification. Hierarchical approaches~\cite{hierrerror2025} decompose errors across agent boundaries, while VerifyMAS~\cite{verifymas2026} introduces hypothesis verification for attribution (all abstract-verified).
+
+\paragraph*{RL-trained approaches}
+These replace hand-designed metrics with learned attribution. AgenTracer~\cite{agentracer2026} trains an 8B-parameter failure tracer via reinforcement learning, achieving 69.10\% agent-level accuracy on Who\&When (184 failures), outperforming DeepSeek-R1 by 12.21pp (ICLR 2026)~\cite{agentracer2026}. MASPrism~\cite{masprism2026} takes a lightweight alternative, using a prefill-stage SLM for attribution (abstract-verified).
+
+\paragraph*{Beyond attribution.}
+Several methods extend failure localization toward repair and intervention: diagnosis-driven automatic repair~\cite{diagrepair2026} closes the loop from attribution to fix, AgentTether~\cite{agenttether2026} combines graph-guided diagnosis with runtime intervention, and interactive debugging~\cite{interactivedebug2025} enables human-in-the-loop steering (CHI 2025). Additional methods include FALAT~\cite{falat2026} (dependency-guided search), DoVer~\cite{dover2026} (intervention + replay, recovering 18--28\% of failed trials), EAGER~\cite{eager2026} (unsupervised contrastive trace representation), and holistic evaluation frameworks~\cite{holisticeval2026} (all abstract-verified). Meta-evaluation work~\cite{whwhpro2026} has begun assessing the attribution methods themselves, and the same shift toward online auditing appears in AgentForesight~\cite{agentforesight2026}, which monitors a trajectory while it runs and emits an alarm before the failure surfaces rather than reconstructing it afterwards (abstract-verified).
+
+\begin{table*}[t]
+\centering
+\caption{Failure localization methods for multi-agent systems. Tier~1 results are from full-text verification, except those marked $^\dagger$, which are venue-published but reported from the published text without page-level cross-verification (Tier~1b); Tier~2 results marked [a] are as reported in source abstracts and are not independently verified. The tier rule and the 1a/1b split are given in Section~\ref{sec:background}. \textbf{Pub.}: $\checkmark$ = peer-reviewed main-track venue, $\circ$ = preprint or workshop paper. --- = not stated in the source. \emph{These numbers come from different benchmarks, protocols, and observability settings; this table is a landscape summary, not a head-to-head comparison (see Section~\ref{sec:tension}).}}
+\label{tab:failure_loc}
+\scriptsize
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{@{}p{0.145\textwidth}p{0.155\textwidth}lp{0.115\textwidth}p{0.125\textwidth}p{0.135\textwidth}cp{0.04\textwidth}@{}}
+\toprule
+\textbf{System} & \textbf{Approach} & \textbf{Gran.} & \textbf{Bench.} & \textbf{Overhead} & \textbf{Key Result} & \textbf{Tier} & \textbf{Pub.} \\
+\midrule
+FAMAS & Stat. (SBFL) & Action & Who\&When & 20 replays & 66\% top-1 & 1 & $\circ$ \\
+TrajAudit & LLM-guided & Step & RootSE & 86--92\% tok. & +24.7pp & 1 & $\circ$ \\
+AgenTracer & RL (8B) & Agent & Who\&When & 8B train & 69.10\% & 1$^\dagger$ & $\checkmark$ \\
+AgentRx & LLM-guided & Step & --- & --- & +23.6pp step [a] & 2 & $\circ$ \\
+FALAT & Dependency & Step & Who\&When & --- & 46.0\% step [a] & 2 & $\circ$ \\
+DoVer & Interv.+Replay & Step & --- & multiple replays & 18--28\% [a] & 2 & $\checkmark$ \\
+MASPrism & Prefill SLM & Step & --- & --- & --- [a] & 2 & $\circ$ \\
+RAFFLES & Reasoning & Step & Who\&When & --- & --- [a] & 2 & $\checkmark$ \\
+AgentLocate & LLM judge & Step & --- & --- & --- [a] & 2 & $\checkmark$ \\
+CausalFlow & Stat. (Causal) & Step & --- & --- & 36.2\% [a] & 2 & $\circ$ \\
+StepFinder & Temporal sem. & Step & Who\&When & --- & +10.35pp [a] & 2 & $\circ$ \\
+EAGER & Contrastive & System & --- & --- & prelim. [a] & 2 & $\circ$ \\
+\bottomrule
+\end{tabular}
+\end{table*}
+\vspace{-2pt}
+{\footnotesize \emph{Non-comparability.} The ``Key Result'' column aggregates measurements taken on different benchmarks (Who\&When, RootSE, or task-specific sets), under different observability settings (output-only vs.\ full traces), and against different baselines. Methods also differ in what they require at inference time (replay budget, training, token cost). The rows therefore describe a landscape of approaches, not a ranked comparison; no cross-row ranking should be inferred. Pub.\ records the publication venue only and is not a quality judgement.}
+
+\subsection{Observability and Tracing}\label{sec:diag_obs}
+
+Failure localization depends on rich execution traces, yet the multi-agent observability stack remains fragmented across three levels: conceptual models, protocols, and tooling~\cite{aiobsmultilayer2026}.
+
+At the \emph{conceptual level}, \cite{agenttraces2026} present a seven-dimension provenance taxonomy (trace sources, evidence units, execution units, nine relation types, run-to-token granularity, online/offline timing, interaction context). This taxonomy exposes a key architectural split between post-hoc debugging and runtime enforcement. Complementary taxonomies address observability from an operations perspective~\cite{agentopscsiro2024, architectingops2026, agentsysops2026}, and a multi-layer survey~\cite{aiobsmultilayer2026} proposes a five-layer framework spanning data, model, agent, system, and application observability (all abstract-verified).
+
+At the \emph{protocol level}, the OpenTelemetry GenAI conventions~\cite{opentelemetry2026} provide vendor-neutral attributes (\texttt{gen\_ai.*}) for LLM spans, but semantic interoperability remains limited. AgentTrace~\cite{agenttrace2026} proposes structured logging specifically for agent systems (AAAI 2026 Workshop, abstract-verified), and process mining approaches~\cite{processobserv2025} apply workflow analysis to agent traces (abstract-verified).
+
+At the \emph{tooling level}, a vendor survey reports 89\% observability adoption among enterprises using AI agents~\cite{zapier2025} (Tier-3 vendor data), with LangSmith~\cite{langsmith2026}, Langfuse, and Arize Phoenix as leading platforms. The Insights Generator~\cite{insightsgenerator2026} demonstrates that corpus-level trace mining improves downstream performance by 30.4pp (abstract-verified). Security-focused tooling has also emerged: auditable agent frameworks~\cite{auditableagents2026, secaudit2026} build unified graphs for security auditing, and view-oriented compilers~\cite{viewcompiler2026} enable multi-perspective trace analysis (all abstract-verified).
+
+Table~\ref{tab:obs_safety} summarizes the observability and safety landscape.
+
+\begin{table*}[t]
+\centering
+\caption{Observability, tracing, and safety systems. \textbf{Pub.}: $\checkmark$ = peer-reviewed main-track venue, $\circ$ = preprint, workshop paper, or no confirmed venue, --- = documentation or platform (not a publication). Pub.\ records the venue only and is not a quality judgement.}
+\label{tab:obs_safety}
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}llccc@{}}
+\toprule
+\textbf{System} & \textbf{Category} & \textbf{Open} & \textbf{Tier} & \textbf{Pub.} \\
+\midrule
+\multicolumn{5}{l}{\emph{Observability \& Tracing}} \\
+Agent Traces & Taxonomy & --- & 1 & $\circ$ \\
+OTel GenAI & Standard & \checkmark & 3 & --- \\
+AgentTrace & Structured log & --- & 2 & $\circ$ \\
+LangSmith & Platform & --- & 3 & --- \\
+Insights Gen. & Diagnostic & --- & 2 & $\circ$ \\
+\midrule
+\multicolumn{5}{l}{\emph{Safety \& Reliability}} \\
+G-Safeguard & Topology GNN & --- & 1$^\dagger$ & $\checkmark$ \\
+ShieldAgent & Policy verif. & --- & 1$^\dagger$ & $\checkmark$ \\
+LlamaFirewall & ML-layered & \checkmark & 2 & $\circ$ \\
+SAIGuard & Proactive MAS & --- & 2 & $\circ$ \\
+AGrail & Lifelong guard & --- & 2 & $\circ$ \\
+AgentDoG & Alignment & --- & 2 & $\circ$ \\
+ReGuard & Reactive & --- & 2 & $\circ$ \\
+\bottomrule
+\end{tabular}
+\par\vspace{2pt}{\footnotesize $^\dagger$Venue-published; not page-level verified.}
+\end{table*}
+
+\subsection{Safety and Reliability}\label{sec:diag_safety}
+
+Multi-agent safety poses a distinct challenge: attacks propagate through inter-agent communication, so a single compromised agent can corrupt downstream outputs~\cite{safellmagentsurvey2026, trustworthyagents2025}. Recent surveys identify this cross-agent propagation as the defining difference from single-agent safety~\cite{fullstacksafety2025}. Three paradigms have emerged, each at a different abstraction level. We follow the literature's convention of treating safety as a diagnostic subcategory; as Section~\ref{sec:discussion} argues, this placement is contestable, because a guardrail must both inspect state and act on the serving path.
+
+\emph{Topology-based} approaches exploit the communication graph. G-Safeguard~\cite{gsafeguard2025} uses a GNN to detect anomalies on the multi-agent utterance graph and applies topological intervention, recovering over 40\% of the performance lost to prompt injection (ACL 2025; Tier 1b). SAIGuard~\cite{saiguard2026} extends this to communication-state simulation for proactive defense, SentinelAgent~\cite{sentinelagent2025} detects node-, edge-, and path-level anomalies on a typed execution graph, and BlindGuard~\cite{blindguard2025} performs the same detection without attack labels by training on normal-only interaction data (all abstract-verified). This graph-level reasoning is particularly salient in multi-agent settings because failures can propagate across inter-agent communication edges.
+
+\emph{Policy-reasoning guardrails} verify another agent's action trajectory against explicit safety policies. ShieldAgent~\cite{shieldagent2025} is a single guardrail agent that extracts verifiable rules from policy documents and checks each proposed action against them, reporting 90.1\% recall of violated rules while using 64.7\% fewer API queries and 58.2\% less inference time than prior approaches (ICML 2025; Tier~1b). \cite{probabilisticarchitecture2026} provide a theoretical foundation via a three-layer probabilistic architecture, and VeriGuard~\cite{veriguard2025} applies verified code generation for safety-critical agents. The Swiss Cheese model~\cite{swisscheese2025} offers a complementary defense-in-depth framework (all abstract-verified).
+
+\emph{ML-layered} defenses stack classifiers. LlamaFirewall~\cite{llamafirewall2025} layers PromptGuard2 (AUC 0.98) with an alignment verifier, reducing attack success from 17.6\% to 1.75\%. AGrail~\cite{agrail2025} introduces lifelong adaptive guardrails that evolve with agent deployment (abstract-verified), and GuardAgent~\cite{guardagent2024} enables knowledge-based guardrail reasoning (abstract-verified).
+
+Complementary systems span pre-execution alignment (AgentDoG~\cite{agentdog2026}), control-theoretic recovery (ReGuard~\cite{pandya2025}), and automated auditing (AgentAuditor~\cite{agentauditor2025}, NeurIPS 2025). Safety benchmarks include GuardianAgentBench~\cite{guardianagentbench2026} (580 scenarios), OSGuard~\cite{osguard2026} (2.7\% FPR), Agent-SafetyBench~\cite{agentsafetybench2024}, and AgentHarm~\cite{agentharm2024} (all abstract-verified).
+
+\subsection{Benchmarks}\label{sec:diag_bench}
+
+Progress in diagnostics depends on benchmarks varying in failure coverage, trace fidelity, and evaluation scope. Table~\ref{tab:benchmarks} summarizes the landscape.
+
+The highest-fidelity benchmark is TraceElephant~\cite{traceelephant2026}: 220 failures from three production systems with full observability. At the \emph{agent} level, complete traces raise attribution accuracy from 51\% for output-only logs to 62.2\% (+11.2pp, a 22\% relative gain), both under the same All-at-Once protocol. At the \emph{step} level, the same comparison raises accuracy from 16\% to 28.1\% (+12.1pp, a 76\% relative gain), i.e.\ step-level attribution is substantially more sensitive to missing information than agent-level attribution~\cite{traceelephant2026}. Who\&When~\cite{whenwhen2025} provides 184 failures from 127 multi-agent systems as the first dedicated failure attribution benchmark, now with a meta-evaluation extension~\cite{whwhpro2026} (abstract-verified). Domain-specific, RootSE~\cite{trajaudit2026} offers 93 SWE-bench failures with step-level annotations.
+
+Beyond failure attribution, ReliabilityBench~\cite{reliabilitybench2026} reveals that pass@1 overestimates reliability by 20--40\% (abstract-verified), BenchGuard~\cite{benchguard2026} audits benchmark quality (abstract-verified), and MultiAgentBench~\cite{multiagentbench2025} evaluates multi-agent collaboration (ACL 2025, abstract-verified). Safety-specific benchmarks include Agent-SafetyBench~\cite{agentsafetybench2024}, AgentHarm~\cite{agentharm2024}, Agent Security Bench~\cite{asb2025} (ICLR 2025, which reports attack success above 84\% with existing defenses barely effective), and TAMAS~\cite{tamas2026} (ACL 2026, covering Byzantine, colluding, and contradicting agents) (all abstract-verified). A unified capabilities framework~\cite{unifiedcapab2026} and a benchmarking survey~\cite{evalbenchmark2025} address the meta-question of what benchmarks should measure.
+
+\begin{table*}[t]
+\centering
+\caption{Diagnostics and safety benchmarks. \textbf{Pub.}: $\checkmark$ = peer-reviewed venue, $\circ$ = preprint / no confirmed venue. Pub.\ records the venue only and is not a quality judgement.}
+\label{tab:benchmarks}
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+\textbf{Benchmark} & \textbf{Scale} & \textbf{Traces} & \textbf{Domain} & \textbf{Tier} & \textbf{Pub.} \\
+\midrule
+TraceElephant & 220 & Full & Multi & 1 & $\circ$ \\
+Who\&When & 184 & Output & Multi & 2 & $\checkmark$ \\
+RootSE & 93 & Full & SWE & 1 & $\circ$ \\
+MultiAgentBench & --- & --- & Collab & 2 & $\checkmark$ \\
+Agent-SafetyBench & --- & --- & Safety & 2 & $\circ$ \\
+AgentHarm & --- & --- & Safety & 2 & $\circ$ \\
+ReliabilityBench & --- & --- & Reliab. & 2 & $\circ$ \\
+BenchGuard & --- & --- & Meta & 2 & $\circ$ \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+Among the benchmarks surveyed here, none evaluates diagnostics--infrastructure interaction: how diagnostic overhead affects serving performance, or how retention and serving policies affect diagnostic fidelity.
+
+\paragraph*{Diagnostics synthesis.} Across the four diagnostic subcategories, the common dependency is retained execution evidence: localization methods require traces or replays, observability determines what evidence exists, and safety mechanisms must inspect enough context to intervene. The literature is broad but methodologically heterogeneous, so the taxonomy is most useful for comparing assumptions---trace fidelity, replay budget, granularity, and intervention timing---rather than headline accuracy across rows. This shared dependence on runtime evidence motivates the retention analysis in Section~\ref{sec:tension}.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.8\textwidth]{figure3.png}
+\caption{Process view of multi-agent diagnostics. Execution traces are collected through observability infrastructure, then processed through failure localization to produce root-cause attribution, while safety mechanisms may operate continuously alongside execution. This figure complements the landscape in Figure~\ref{fig:taxonomy}: it shows when diagnostic functions act rather than reclassifying the systems.}
+\label{fig:pipeline}
+\end{figure*}
