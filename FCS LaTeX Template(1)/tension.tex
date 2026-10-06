@@ -1,0 +1,44 @@
+The two layers surveyed so far are usually discussed as independent engineering problems, but both place requirements on the same runtime state. Diagnostics benefits from state being \emph{retained} long enough to explain a failure; serving infrastructure benefits from reclaiming state when doing so improves memory, latency, or throughput. The organising axis is therefore \emph{retention}, not simply timing: a serving policy determines what runtime evidence remains available, and diagnosis---online or after the fact---must work from what survives. In the surveyed systems, retention decisions are made locally inside the serving or diagnostic component rather than negotiated across layers.
+
+TraceElephant provides the clearest measured example of why retained evidence matters. Under the same All-at-Once attribution protocol, complete traces raise agent-level accuracy from 51\% to 62.2\%, and step-level accuracy from 16\% to 28.1\% (a 76\% relative gain)~\cite{traceelephant2026}. The comparison does not by itself establish why a production system might retain less information, but it quantifies the diagnostic consequence of reduced observability. This is the empirical anchor for treating trace retention as a cross-layer resource rather than assuming that diagnostic fidelity is independent of serving-state policy.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.8\textwidth]{figure5.png}
+\caption{The diagnostics--infrastructure retention tension. The diagnostics layer (left) benefits from retaining runtime evidence for failure explanation, while the infrastructure layer (right) reclaims state under memory, latency, and throughput budgets. The centre summarizes two cross-layer conflict mechanisms, one intra-layer analogue, and one boundary condition. Among the surveyed systems, none manages retention as an explicit cross-layer budget.}
+\label{fig:tension}
+\end{figure*}
+
+We call this the diagnostics--infrastructure retention tension. It is a trade-off, not a claim that every infrastructure optimization necessarily harms diagnosis: the two layers optimize different objectives over overlapping runtime objects, and the conflict appears when reclaiming or compressing those objects removes evidence needed later. Two cross-layer mechanisms make the issue concrete; a third instance shows the same shape within the diagnostic layer itself; and a fourth marks where the conflict would become acute for online diagnosis.
+
+\emph{Swapping state off the fast path.} ScaleSim's distance-aware eviction~\cite{zhou2026} prioritizes agent states with long invocation distance for movement off the fastest memory tier. From a diagnostic perspective, those inactive states can still contain history useful for later reconstruction. ScaleSim does not delete the state by definition; the relevant cross-layer question is whether moved state, associated KV cache, and related execution context remain available long enough for diagnosis or are later reclaimed or recomputed. The surveyed serving policy optimizes reuse and memory pressure, not diagnostic value, which exposes the difference in objectives without implying that eviction always destroys evidence.
+
+\emph{Environment snapshots are not a first-class serving primitive.} Replay-based attribution needs more than a text trace. FAMAS~\cite{famas2025} re-executes a failed task $k=20$ times and expects the environment to reach comparable states, and DoVer~\cite{dover2026} intervenes mid-trajectory and reruns from the intervention point, which requires the environment to be restorable. The serving systems surveyed here do not expose environment-snapshot retention as a diagnostic primitive. Consequently, replay-based methods are typically evaluated on fixed corpora or reconstructable environments rather than under a live serving policy with an explicit snapshot budget.
+
+\emph{The diagnostic layer has an isomorphic tradeoff internally.} TrajAudit's Semantic Saliency Folding~\cite{trajaudit2026} compresses 86--92\% of observations into placeholders to fit the model's context window. This is the diagnostician's own retention decision, with more context potentially supporting attribution and compression lowering cost. It is not a cross-layer conflict, but it shows that evidence retention already appears as a cost--fidelity trade-off inside diagnostics.
+
+\emph{Replay is a serving cost: a boundary condition.} The replay budget is distinct from the restorable environment required above: a method could retain a restorable environment and still replay only once. FAMAS's twenty replays conflict with serving only if diagnosis runs on the serving path. Because FAMAS is evaluated offline on a fixed corpus, the conflict is latent rather than actual; it marks where the tension would become acute for an online diagnostic. The existence of zero-replay debugging~\cite{zeroreplay2026} is consistent with replay cost becoming important when diagnosis must run closer to execution time.
+
+Table~\ref{tab:tension} contrasts the two layers along the dimensions that generate these conflicts. The rows are not independent: retention budget is the shared resource, and each mechanism above is a different way of spending it. Among the surveyed systems, we did not identify one that treats diagnostic value and serving value within a shared retention budget; the four co-design directions that follow from this view are developed in Section~\ref{sec:discussion}.
+
+\begin{table*}[t]
+\centering
+\caption{A stylized contrast between diagnostic and infrastructure tendencies over shared runtime resources. These are design tendencies in the surveyed literature, not universal requirements.}
+\label{tab:tension}
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}p{0.20\textwidth}p{0.34\textwidth}p{0.34\textwidth}@{}}
+\toprule
+\textbf{Dimension} & \textbf{Diagnostics tendency} & \textbf{Infrastructure tendency} \\
+\midrule
+Runtime state & Benefits from richer per-step inputs, outputs, and tool logs & Retains state needed for serving or expected reuse \\
+Retention horizon & Benefits from retaining evidence until diagnosis & Reclaims state when expected reuse or value becomes low \\
+Eviction criterion & May value diagnostically informative low-reuse state & Often prioritizes reuse probability and memory pressure \\
+Granularity & Often step-level and cross-agent (to localise cause) & Often request- and agent-level (to place work) \\
+Overhead budget & May tolerate replay or richer capture, especially offline & Constrained by latency, throughput, and memory SLOs \\
+Replay resources & May require restorable environment snapshots & Typically does not retain snapshots for diagnosis \\
+\bottomrule
+\end{tabular}
+\end{table*}
+\vspace{-2pt}
+{\footnotesize \emph{Observed instances.} Cross-layer: ScaleSim's eviction moves inactive state off the fast path~\cite{zhou2026}; surveyed serving systems do not expose the environment snapshots needed by replay-based attribution~\cite{famas2025,dover2026}. Intra-layer analogue: TrajAudit compresses 86--92\% of observations~\cite{trajaudit2026}. Boundary: replay ($k{=}20$) becomes a serving concern when diagnosis runs online~\cite{famas2025}. Continuum's TTL expiry~\cite{continuum2025} raises resumption cost within the cache layer, not across the diagnostics--infrastructure boundary. Reduced observability in TraceElephant lowers step-level attribution from 28.1\% to 16\% under the same protocol~\cite{traceelephant2026}.}
