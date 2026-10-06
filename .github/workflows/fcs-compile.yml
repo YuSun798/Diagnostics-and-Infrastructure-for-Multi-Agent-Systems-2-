@@ -10,7 +10,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: xu-cheng/latex-action@v3
         with:
-          root_file: template.tex
-          working_directory: FCS LaTeX Template(1)
+          root_file: FCS LaTeX Template(1)/template.tex
           latexmk_use_xelatex: false
           args: -pdf -file-line-error -interaction=nonstopmode
