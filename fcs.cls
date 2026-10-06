@@ -188,7 +188,7 @@
   {
     \begin{tikzpicture}[remember~picture, overlay, every~node/.style={inner~sep=0pt}]
       \node[anchor=north~east, xshift=-22mm] at (current~page.north~east) 
-        {\includegraphics{logo.pdf}};
+        {\includegraphics{FCS LaTeX Template(1)/figures/logo.pdf}};
     \end{tikzpicture}
   }
 
