@@ -1,106 +1,80 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Frontiers in Computer Science — Review article
-% Class: FrontiersinHarvard (author-date reference style)
-% Entry point for the Frontiers submission (conversion of ICLR v5).
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% !TeX program = pdflatex
+% Frontiers of Computer Science (FCS) 2026 official template migration
+\documentclass[review]{fcs}
 
-\documentclass[utf8]{FrontiersinHarvard} % Harvard (author-date) — Frontiers default for most journals
-
-\usepackage{url,hyperref,lineno,microtype,subcaption}
-\hypersetup{hidelinks}
-\usepackage[onehalfspacing]{setspace}
+\usepackage{graphicx}
 \usepackage{booktabs}
-\usepackage{amssymb}
 \usepackage{multirow}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\usepackage{cite}
+\usepackage{enumitem}
 
-\linenumbers
+\title{Diagnostics and Infrastructure for Foundation Model-Based Multi-Agent Systems: A Review of the Runtime Stack}
 
-\graphicspath{{./}}
+\author[1,+]{Yu~Sun}
+\author[2]{Zuodong~Xiang}
+\author[3]{Yike~Zhang}
+\author[4]{Xinyu~Guan}
+\author[5]{Pengcheng~Xu}
+\author[3]{Yizirui~Fang}
+\author[6]{Hailu~Xu}
 
-\def\keyFont{\fontsize{8}{11}\helveticabold }
-% Author metadata supplied for the current Frontiers submission.
-\def\firstAuthorLast{Sun {et~al.}}
-\def\Authors{Yu Sun\,$^{1,*}$, Zuodong Xiang\,$^{2}$, Yike Zhang\,$^{3}$, Xinyu Guan\,$^{4}$, Pengcheng Xu\,$^{5}$, Yizirui Fang\,$^{6}$, Hailu Xu\,$^{7}$}
-\def\Address{$^{1}$School of Engineering and Applied Science, University of Pennsylvania, Philadelphia, PA, United States \\
-$^{2}$Department of Electrical and Computer Engineering, College of Engineering, University of California, Davis, Davis, CA, United States \\
-$^{3, 6}$Department of Computer Science, Whiting School of Engineering, Johns Hopkins University, Baltimore, MD, United States \\
-$^{4}$University of Glasgow, Glasgow, Scotland, United Kingdom \\
-$^{5}$Department of Computer Science, University of California, Irvine, Irvine, CA, United States \\
-$^{7}$Department of Computer Engineering and Computer Science, College of Engineering, California State University, Long Beach, Long Beach, CA, United States}
-\def\corrAuthor{Yu Sun}
-\def\corrEmail{yu.sun@alumni.upenn.edu}
+\address[1]{School of Engineering and Applied Science, University of Pennsylvania, Philadelphia, PA, United States}
+\address[2]{Department of Electrical and Computer Engineering, College of Engineering, University of California, Davis, Davis, CA, United States}
+\address[3]{Department of Computer Science, Whiting School of Engineering, Johns Hopkins University, Baltimore, MD, United States}
+\address[4]{University of Glasgow, Glasgow, Scotland, United Kingdom}
+\address[5]{Department of Computer Science, University of California, Irvine, Irvine, CA, United States}
+\address[6]{Department of Computer Engineering and Computer Science, College of Engineering, California State University, Long Beach, Long Beach, CA, United States}
 
-\begin{document}
-\onecolumn
-\firstpage{1}
-
-\title[Diagnostics and Infrastructure for Multi-Agent Systems]{Diagnostics and Infrastructure for Foundation Model-Based Multi-Agent Systems: A Review of the Runtime Stack}
-
-\author[\firstAuthorLast ]{\Authors}
-\address{}
-\correspondance{}
-
-\extraAuth{Additional author emails: Zuodong Xiang: shawnzxiang@gmail.com; Yike Zhang: zykk0330@gmail.com; Xinyu Guan: 798750933strikerg@gmail.com; Pengcheng Xu: pengcheng.xu@uci.edu; Yizirui Fang: yizirui.fang@gmail.com; Hailu Xu: hailu.xu@csulb.edu.}
-
-\maketitle
+\corremail{yu.sun@alumni.upenn.edu}
+\fcssetup{
+  received = {},
+  accepted = {},
+  article-id = {},
+  first-page = {1},
+}
 
 \begin{abstract}
-
-\section{}
 \input{abstract}
-
-\tiny
-\keyFont{ \section{Keywords:} multi-agent systems, diagnostics, failure localization, observability, safety guardrails, LLM serving, infrastructure, survey}
 \end{abstract}
+
+\keywords{multi-agent systems; foundation models; diagnostics; observability; serving infrastructure; memory management; scheduling; runtime reliability}
+
+\begin{document}
 
 \section{Introduction}\label{sec:introduction}
 \input{introduction}
 
-\section{Background}\label{sec:background}
+\section{Background and Review Methodology}\label{sec:background}
 \input{background}
 
-\section{Diagnostics Layer}\label{sec:diagnostics}
+\section{Diagnostics}\label{sec:diagnostics}
 \input{diagnostics}
 
-\section{Infrastructure Layer}\label{sec:infrastructure}
+\section{Infrastructure}\label{sec:infrastructure}
 \input{infrastructure}
 
-\section{The Diagnostics--Infrastructure Tension}\label{sec:tension}
+\section{Diagnostics--Infrastructure Retention Tension}\label{sec:tension}
 \input{tension}
 
-\section{Discussion}\label{sec:discussion}
+\section{Discussion and Research Directions}\label{sec:discussion}
 \input{discussion}
 
 \section{Conclusion}\label{sec:conclusion}
 \input{conclusion}
 
-\section*{Conflict of Interest Statement}
-The authors declare that the research was conducted in the absence of any commercial or financial relationships that could be construed as a potential conflict of interest.
-
-\section*{Author Contributions}
-Yu Sun: Conceptualization, Methodology, Writing -- original draft, Writing -- review and editing. Zuodong Xiang: Writing -- review and editing. Yike Zhang: Writing -- review and editing. Xinyu Guan: Writing -- review and editing. Pengcheng Xu: Writing -- review and editing. Hailu Xu: Writing -- review and editing. All authors contributed to the article and approved the submitted version.
-
-\section*{Funding}
-This research received no external funding.
-
-\section*{Data Availability Statement}
-This is a literature survey covering 111 references and 45 systems (counted across the survey's own system tables, excluding benchmarks and comparator surveys), with 6 figures and 6 tables. No new experimental datasets were generated for this study. All evidence synthesized in this review is drawn from the publicly available sources cited in the manuscript.
-
-\section*{Ethics Statement}
-This review introduces no new human or animal subjects and no new experimental datasets. The retention-focused research agenda raises privacy and governance risks because richer runtime evidence can extend the lifetime and attack surface of user inputs, tool outputs, credentials, and reasoning traces; these risks and mitigation principles are discussed in \S\ref{sec:discussion}.
-
-\section*{AI Use Disclosure}
-This manuscript was prepared with AI-assisted tools. Specifically, Apex Research, developed by Apex Intelligence (the provider does not publicly specify the underlying model), was used for four tasks: literature search and screening, taxonomy construction, draft generation, and reference verification. Quantitative claims used for cross-system comparison were verified through full-text analysis of primary sources; results marked [a] are reported as stated in source abstracts. Representative generative-AI prompts used for these tasks are listed in the Supplementary Material. The authors reviewed and approved all AI-assisted output and take full responsibility for the content, accuracy, and completeness of the manuscript.
+\fontsize{8.5pt}{10pt}\selectfont
 
 \section*{Acknowledgements}
-The authors acknowledge the use of the AI-assisted tools detailed in the AI Use Disclosure above.
+The authors acknowledge the use of AI-assisted tools for language editing and manuscript preparation. All technical claims, interpretations, citations, and conclusions were reviewed and remain the responsibility of the authors.
 
-\section*{Supplemental Data}
-The Supplementary Material for this article contains representative generative-AI prompts used in manuscript preparation, per the Frontiers BE WISE AI guidance, and should be uploaded as a separate supplementary file with the submission.
+\section*{Competing interests}
+The authors declare that they have no competing interests or financial conflicts to disclose.
 
-\bibliographystyle{Frontiers-Harvard}
-{\small
+\bibliographystyle{fcs}
 \bibliography{references}
-}
 
 \end{document}
