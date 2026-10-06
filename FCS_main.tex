@@ -1,0 +1,87 @@
+\documentclass[twocolumn]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{times}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\usepackage{cite}
+\usepackage{authblk}
+\usepackage{enumitem}
+\usepackage{geometry}
+\geometry{margin=0.72in,columnsep=0.24in}
+
+\graphicspath{{./}}
+
+\title{Diagnostics and Infrastructure for Foundation Model-Based Multi-Agent Systems: A Review of the Runtime Stack}
+
+\author[1]{Yu Sun\thanks{Corresponding author: yu.sun@alumni.upenn.edu}}
+\author[2]{Zuodong Xiang}
+\author[3]{Yike Zhang}
+\author[4]{Xinyu Guan}
+\author[5]{Pengcheng Xu}
+\author[6]{Hailu Xu}
+
+\affil[1]{School of Engineering and Applied Science, University of Pennsylvania, Philadelphia, PA, United States}
+\affil[2]{Department of Electrical and Computer Engineering, College of Engineering, University of California, Davis, Davis, CA, United States}
+\affil[3]{Department of Computer Science, Whiting School of Engineering, Johns Hopkins University, Baltimore, MD, United States}
+\affil[4]{Alibaba Group, Hangzhou, Zhejiang, China}
+\affil[5]{Department of Computer Science, University of California, Irvine, Irvine, CA, United States}
+\affil[6]{Department of Computer Engineering and Computer Science, College of Engineering, California State University, Long Beach, Long Beach, CA, United States}
+
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\input{abstract}
+\end{abstract}
+
+\noindent\textbf{Keywords:} multi-agent systems; diagnostics; failure localization; observability; safety guardrails; LLM serving; infrastructure; survey
+
+\section{Introduction}\label{sec:introduction}
+\input{introduction}
+
+\section{Background and Review Methodology}\label{sec:background}
+\input{background}
+
+\section{Diagnostics Layer}\label{sec:diagnostics}
+\input{diagnostics}
+
+\section{Infrastructure Layer}\label{sec:infrastructure}
+\input{infrastructure}
+
+\section{The Diagnostics--Infrastructure Tension}\label{sec:tension}
+\input{tension}
+
+\section{Discussion}\label{sec:discussion}
+\input{discussion}
+
+\section{Conclusion}\label{sec:conclusion}
+\input{conclusion}
+
+\section*{Acknowledgements}
+The authors acknowledge the use of AI-assisted tools for literature search, taxonomy construction, draft support, and reference verification. All substantive claims and the final manuscript were reviewed and approved by the authors.
+
+\section*{Competing interests}
+The authors declare that they have no competing interests or financial conflicts to disclose.
+
+\section*{Data availability}
+This is a literature review. No new experimental dataset was generated. The evidence synthesized in this article is drawn from the publicly available sources cited in the manuscript.
+
+\section*{Author contributions}
+Yu Sun: Conceptualization, Methodology, Writing---original draft, Writing---review and editing. Zuodong Xiang, Yike Zhang, Xinyu Guan, Pengcheng Xu, and Hailu Xu: Writing---review and editing. All authors approved the submitted manuscript.
+
+\bibliographystyle{unsrt}
+{\small
+\bibliography{references}
+}
+
+\end{document}
